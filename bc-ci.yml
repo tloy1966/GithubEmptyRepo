@@ -1,0 +1,27 @@
+trigger: none
+pr: none
+
+pool:
+  vmImage: windows-latest
+
+steps:
+- checkout: self
+
+- pwsh: |
+    Write-Host "Branch: $env:BUILD_SOURCEBRANCH"
+    Write-Host "Provider: $env:BUILD_REPOSITORY_PROVIDER"
+    Write-Host "Run ID: $env:BUILD_BUILDID"
+
+    $folder = $env:BUILD_ARTIFACTSTAGINGDIRECTORY
+    New-Item -ItemType Directory -Path $folder -Force | Out-Null
+
+    $file = Join-Path $folder 'repro.txt'
+    Set-Content -LiteralPath $file -Value 'Branch control reproduction'
+  displayName: Create test artifact
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish test artifact
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: drop
+    publishLocation: Container
